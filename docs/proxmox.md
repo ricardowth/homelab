@@ -62,12 +62,19 @@ O primeiro deploy demora uns minutos (instala, compila e corre os testes).
 ## 4. Tailscale (HTTPS só para os teus dispositivos)
 
 ```bash
-tailscale up --hostname=financas      # abrir o link que aparece e autorizar
+tailscale up --hostname=financas --accept-dns=false   # abrir o link que aparece e autorizar
 tailscale serve --bg 3000
 ```
 
 A app fica em `https://financas.<tailnet>.ts.net` (o nome completo aparece em `tailscale serve status`).
-Se for o primeiro serviço com HTTPS na tailnet, o Tailscale pede para ativar *HTTPS Certificates* na consola de admin.
+Se for o primeiro serviço com HTTPS na tailnet, o Tailscale pede para ativar *Serve* / *HTTPS Certificates*
+na consola de admin — ativar **só** isso, **não** o Funnel (que publicaria a app na internet).
+
+Na consola do Tailscale (*Machines → financas → …*): **Disable key expiry**, senão desliga-se ao fim de 180 dias.
+
+> **DNS:** o router dá servidores de DNS do ISP em `100.x.x.x`, a mesma gama que o Tailscale usa; com o
+> Tailscale ligado, o DNS deixava de funcionar (sem deploys nem certificado). O `install.sh` fixa
+> `1.1.1.1` e `9.9.9.9` no container e o `--accept-dns=false` impede o Tailscale de os trocar.
 
 ## 5. Passar os dados
 

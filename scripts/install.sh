@@ -25,6 +25,14 @@ if ! command -v node >/dev/null || [[ $(node -v) != v22* ]]; then
 fi
 echo "node $(node -v)"
 
+# O router/ISP dá DNS em 100.64.0.0/10, a mesma gama do Tailscale: com o Tailscale ligado, as perguntas
+# de DNS iam pelo túnel e perdiam-se (sem DNS não há deploy nem certificado HTTPS). Fixa DNS públicos.
+if [[ -f /etc/dhcp/dhclient.conf ]] && ! grep -q 'supersede domain-name-servers' /etc/dhcp/dhclient.conf; then
+  passo "DNS fixos (1.1.1.1, 9.9.9.9)"
+  echo 'supersede domain-name-servers 1.1.1.1, 9.9.9.9;' >> /etc/dhcp/dhclient.conf
+  printf 'nameserver 1.1.1.1\nnameserver 9.9.9.9\n' > /etc/resolv.conf
+fi
+
 passo "Utilizador e pastas ($BASE)"
 id "$APP" &>/dev/null || useradd --system --home-dir "$BASE" --shell /usr/sbin/nologin "$APP"
 mkdir -p "$BASE"/{releases,shared,data} "$BACKUP_DIR"
@@ -124,5 +132,5 @@ echo
 cat "$BASE/shared/deploy_key.pub"
 echo
 echo "2. Primeiro deploy:   $HOMELAB/scripts/deploy.sh $CONF --forcar && systemctl start $APP-deploy.timer"
-echo "3. Tailscale:         tailscale up --hostname=$APP && tailscale serve --bg $PORT"
+echo "3. Tailscale:         tailscale up --hostname=$APP --accept-dns=false && tailscale serve --bg $PORT"
 echo "4. Google Drive:      rclone config  (remote \"gdrive\"; ver docs) && systemctl start $APP-backup.timer"
