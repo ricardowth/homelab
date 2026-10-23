@@ -89,10 +89,15 @@ A partir daqui os dados reais vivem no servidor — os PCs ficam só para desenv
 O container não tem browser, por isso a autorização faz-se no PC:
 
 1. No PC (Windows): instalar o rclone (`winget install Rclone.Rclone`).
-2. No container: `rclone config` → `n` (novo) → nome **`gdrive`** → tipo `drive` → client id/secret vazios →
-   scope `1` (acesso total) → *Edit advanced config* `n` → *Use auto config?* **`n`**.
+2. No container: `rclone config` → `n` (novo) → nome **`gdrive`** → tipo `drive` → client id/secret
+   (vazios, ou os do teu próprio client — ver abaixo) → scope **`drive.file`** (o rclone só vê o que ele próprio
+   cria, não o resto do Drive) → *Edit advanced config* `n` → *Use auto config?* **`n`**.
 3. Ele mostra um comando `rclone authorize "drive" "…"`: correr esse comando **no PC**, autorizar no browser
-   e colar o resultado de volta no container. *Shared drive* `n`, confirmar.
+   e colar o resultado (um bloco base64) de volta no container. *Shared drive* `n`, confirmar.
+
+   > O *client_id* partilhado do rclone vai deixar de funcionar durante 2026. Para não depender dele, criar um
+   > próprio: <https://rclone.org/drive/#making-your-own-client-id> (projeto no Google Cloud, ativar a Drive API,
+   > OAuth client do tipo *Desktop app*) e usar esse client id/secret no passo 2 e no `rclone authorize`.
 4. No container:
 
    ```bash
