@@ -15,7 +15,8 @@ passo() { echo; echo "==> $*"; }
 
 passo "Pacotes base"
 apt-get update -qq
-apt-get install -y -qq git curl ca-certificates openssl openssh-client >/dev/null
+# unzip: o instalador do rclone precisa dele
+apt-get install -y -qq git curl ca-certificates openssl openssh-client unzip >/dev/null
 
 if ! command -v node >/dev/null || [[ $(node -v) != v22* ]]; then
   passo "Node 22"
