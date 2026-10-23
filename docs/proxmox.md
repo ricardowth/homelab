@@ -105,7 +105,7 @@ O container não tem browser, por isso a autorização faz-se no PC:
    systemctl start financas-backup.timer      # e depois de 6 em 6 horas
    ```
 
-Os ficheiros vão para `Backups/Financas-servidor` no Drive, cifrados pela app (`BACKUP_PASSWORD`).
+Os ficheiros vão para `homelab-backups/<app>` no Drive (com `drive.file` o rclone só vê as pastas que ele criou), cifrados pela app (`BACKUP_PASSWORD`).
 O rclone só copia (nunca apaga do Drive).
 
 ## 7. Backup do container inteiro (no Proxmox)
