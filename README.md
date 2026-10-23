@@ -15,6 +15,7 @@ a partir do GitHub, HTTPS pela tailnet (Tailscale) e backups para o Google Drive
 | App | Repo | Endereço |
 |---|---|---|
 | financas | ricardowth/personal-finance | `https://financas.<tailnet>.ts.net` |
+| purrfolio | ricardowth/purrfolio | `https://purrfolio.<tailnet>.ts.net` |
 
 ## Como funciona o deploy
 

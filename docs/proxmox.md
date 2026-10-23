@@ -128,3 +128,32 @@ Se o container se estragar, restaura-se daí em minutos.
 
 Uma versão que falhe no build, nos testes ou ao arrancar **não substitui** a que está a correr; fica registada
 e não volta a ser tentada até haver um commit novo (ou `--forcar`).
+
+## Purrfolio (diferenças)
+
+Os mesmos passos com `purrfolio` no lugar de `financas` (container 102, porta 5174,
+[apps/purrfolio.conf](../apps/purrfolio.conf)). O que muda:
+
+- **Sem login:** a app ouve só em `127.0.0.1` (`HOST` no `.env`), por isso só se chega lá pelo `tailscale serve`.
+- **Passar os dados:** copiar a pasta `data/` do PC (`data.json`, `uploads/`, `backups/`) para `/srv/purrfolio/data`
+  com o serviço parado, e `chown -R purrfolio:purrfolio`.
+- **Google Drive:** reutiliza o remote `gdrive` (o mesmo client do Google) — copiar o `rclone.conf` do container das
+  finanças, pelo host:
+
+  ```bash
+  pct pull 101 /root/.config/rclone/rclone.conf /root/rclone.conf
+  pct exec 102 -- mkdir -p /root/.config/rclone
+  pct push 102 /root/rclone.conf /root/.config/rclone/rclone.conf --perms 600 && rm /root/rclone.conf
+  ```
+
+  A app não cifra os backups, por isso os ficheiros passam por um remote **crypt**, com a password do `.env`:
+
+  ```bash
+  set -a; . /srv/purrfolio/shared/.env; set +a
+  rclone config create purrfolio-cifrado crypt remote=gdrive:homelab-backups/purrfolio \
+    password="$(rclone obscure "$BACKUP_PASSWORD")" --non-interactive >/dev/null
+  systemctl start purrfolio-backup.service purrfolio-backup.timer
+  ```
+
+  No Drive os nomes e o conteúdo aparecem cifrados. Para recuperar: `rclone copy purrfolio-cifrado: /destino`
+  num sítio com o mesmo `rclone.conf` (ou a mesma password). **Sem a password não há forma de ler o backup.**

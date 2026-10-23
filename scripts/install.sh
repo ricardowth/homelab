@@ -62,6 +62,8 @@ User=$APP
 WorkingDirectory=$BASE/current
 ExecStart=$START_CMD
 Environment=NODE_ENV=production
+# Para apps que não leem o .env sozinhas (as que leem não se importam)
+EnvironmentFile=-$BASE/shared/.env
 Restart=on-failure
 RestartSec=5
 
