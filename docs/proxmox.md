@@ -19,16 +19,22 @@ Exemplo: `financas` (configuração em [apps/financas.conf](../apps/financas.con
 | CPU | 1 core |
 | Memória | 1024 MB (o build precisa; parada usa ~150 MB) · Swap 512 MB |
 | Rede | DHCP |
+| DNS | DNS servers `1.1.1.1 9.9.9.9` (não deixar "use host settings") |
 
 **Antes de o arrancar**, no shell do Proxmox (host), dar-lhe acesso ao `/dev/net/tun` para o Tailscale
-(trocar `105` pelo ID do container):
+e fixar o DNS (trocar `105` pelo ID do container):
 
 ```bash
 cat >> /etc/pve/lxc/105.conf <<'EOF'
 lxc.cgroup2.devices.allow: c 10:200 rwm
 lxc.mount.entry: /dev/net/tun dev/net/tun none bind,create=file
 EOF
+pct set 105 --nameserver "1.1.1.1 9.9.9.9"
 ```
+
+O DNS tem de ficar **na configuração do container** (`pct config 105` mostra `nameserver:`): o Proxmox
+reescreve o `/etc/resolv.conf` do container a cada arranque, por isso mudá-lo só lá dentro não dura.
+Sem isto o deploy e o backup falham com `Could not resolve hostname github.com` (ver a nota no passo 4).
 
 Ativar **Start at boot** em *Options* e arrancar o container.
 
@@ -73,8 +79,10 @@ na consola de admin — ativar **só** isso, **não** o Funnel (que publicaria a
 Na consola do Tailscale (*Machines → financas → …*): **Disable key expiry**, senão desliga-se ao fim de 180 dias.
 
 > **DNS:** o router dá servidores de DNS do ISP em `100.x.x.x`, a mesma gama que o Tailscale usa; com o
-> Tailscale ligado, o DNS deixava de funcionar (sem deploys nem certificado). O `install.sh` fixa
-> `1.1.1.1` e `9.9.9.9` no container e o `--accept-dns=false` impede o Tailscale de os trocar.
+> Tailscale ligado, o DNS deixava de funcionar (sem deploys, backups nem certificado). O `pct set --nameserver`
+> do passo 1 fixa `1.1.1.1` e `9.9.9.9` (o `install.sh` também tenta, mas num container o Proxmox volta a
+> escrever o `resolv.conf` ao arrancar) e o `--accept-dns=false` impede o Tailscale de os trocar.
+> Num container já criado: `pct set <id> --nameserver "1.1.1.1 9.9.9.9"` no host e reiniciar o container.
 
 ## 5. Passar os dados
 
